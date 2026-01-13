@@ -1,0 +1,95 @@
+# Task: Fix User-Agent Randomness Issue
+
+## Problem Description
+
+The fake-useragent library has a **severe randomness problem**:
+
+```python
+from fake import UserAgent
+ua = UserAgent()
+
+# Generate 1000 random user agents
+samples = [ua.random for _ in range(1000)]
+unique = set(samples)
+
+print(f"Generated: 1000 samples")
+print(f"Unique: {len(unique)} different UAs")
+print(f"Repetition rate: {(1000 - len(unique)) / 1000 * 100:.1f}%")
+```
+
+**Current output**: Only 150-160 unique UAs out of 1000 samples (85-90% repetition!)
+
+## Root Cause Analysis
+
+Check the `data/browsers.json` file:
+- Total UA count: **165** (too few!)
+- Data source appears outdated and offline
+- Insufficient diversity across browsers, devices, and platforms
+
+## Your Task
+
+**Fix the randomness issue by upgrading to the Intoli user-agents dataset.**
+
+### Data Source
+
+Use **Intoli user-agents** dataset:
+- Repository: https://github.com/intoli/user-agents
+- Raw data: https://raw.githubusercontent.com/intoli/user-agents/main/src/user-agents.json.gz
+- Contains ~10,000 real user agents based on actual browser traffic
+
+### Requirements
+
+**1. Data Source Migration**
+   - Replace techblog.willshouse.com (offline) with Intoli dataset
+   - Download and integrate the Intoli data
+
+**2. Data Volume Upgrade**
+   - Increase from 165 UAs to ~10,000 UAs (60x improvement)
+   - Target repetition rate: <5% (down from 85-90%)
+
+**3. Format Modernization**
+   - Upgrade from `browsers.json` (JSON array) to `browsers.jsonl` (JSONlines)
+   - Update file loading logic in `utils.py` to read line-by-line
+   - Each line = one JSON object
+
+**4. Data Quality Enhancement**
+   - Preserve usage frequency weights from Intoli data
+   - Maintain device type information (desktop/mobile/tablet)
+   - Keep browser version details
+   - Ensure proper field mapping
+
+**5. Code Compatibility**
+   - Update `utils.py` to load JSONlines format
+   - Maintain backward compatibility - all existing APIs must work
+   - `ua.random`, `ua.chrome`, `ua.firefox` etc. should function correctly
+
+**6. Automation Documentation**
+   - Document the data update process
+   - Explain how to fetch and convert new data from Intoli
+
+### Deliverables
+
+1. **Updated code files**
+   - `utils.py` - Modified data loading logic for JSONlines format
+   - `data/browsers.jsonl` - New dataset (~10,000 UAs)
+   - Other files if needed
+
+2. **Test file** (`test_simple.py` or similar)
+   - Verify UA count increased to ~10,000
+   - Check repetition rate improved to <5%
+   - Test all browser methods work (chrome, firefox, safari, edge, opera, random)
+   - Test device type filtering (desktop, mobile, tablet)
+   - Test data structure (ensure proper fields are preserved)
+
+3. **One-command test script**
+   - `run_tests.sh` (for Unix/Linux/Mac) and/or `run_tests.bat` (for Windows)
+   - Should run all tests with a single command
+   - Display clear pass/fail results
+   - Show improvement statistics (UA count, repetition rate)
+
+4. **README.md**
+   - Problem description with statistics (165 UAs, 85-90% repetition)
+   - Solution overview (Intoli dataset + JSONlines format)
+   - How to run tests (`./run_tests.sh` or `run_tests.bat`)
+   - Data source information and credits
+   - How to update data in the future
